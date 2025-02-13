@@ -34,7 +34,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-php-
       - name: Install Dependencies
-        run: composer install --no-interaction --prefer-dist
+        run: ./app/composer install --no-interaction --prefer-dist
 
       - name: Run PHPStan
         run: docker-compose exec -T app_php ./vendor/bin/phpstan analyse -l max -c phpstan.neon src
