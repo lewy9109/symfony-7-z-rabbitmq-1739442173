@@ -40,3 +40,7 @@ jobs:
       - name: Run PHPStan
         working-directory: ./app
         run: ./vendor/bin/phpstan analyse -l max -c phpstan.neon src
+
+      - name: Run PHP Unit
+        working-directory: ./app
+        run: php bin/phpunit
