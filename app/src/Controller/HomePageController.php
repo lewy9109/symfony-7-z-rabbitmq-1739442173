@@ -16,39 +16,56 @@ class HomePageController extends AbstractController
     public function __construct(
         private MessageBusInterface $messageBus,
         private readonly Uploader $uploader
-    )
-    {
-    }
+    ) {}
 
-    #[Route('/', name: 'app_home_page')]
+    #[Route("/", name: "app_home_page")]
     public function index(Request $request): Response
     {
-        return $this->render('home_page/index.html.twig', [
-            'controller_name' => 'HomePageController',
+        return $this->render("home_page/index.html.twig", [
+            "controller_name" => "HomePageController",
         ]);
     }
 
-    #[Route('/csv/upload', name: 'csv_upload', methods: ['POST'])]
+    #[Route("/csv/upload", name: "csv_upload", methods: ["POST"])]
     public function upload(Request $request): JsonResponse
     {
-        $file = $request->files->get('chunk');
-        $fileName = $request->request->get('fileName');
-        $chunkIndex = (int) $request->request->get('chunkIndex');
-        $totalChunks = (int) $request->request->get('totalChunks');
+        $file = $request->files->get("chunk");
+        $fileName = $request->request->get("fileName");
+        $chunkIndex = (int) $request->request->get("chunkIndex");
+        $totalChunks = (int) $request->request->get("totalChunks");
 
-        if (!$file || !$fileName || $chunkIndex === null || $totalChunks === null) {
-            return new JsonResponse(['error' => 'Brak wymaganych danych'], Response::HTTP_BAD_REQUEST);
+        if (
+            !$file ||
+            !$fileName ||
+            $chunkIndex === null ||
+            $totalChunks === null
+        ) {
+            return new JsonResponse(
+                ["error" => "Brak wymaganych danych"],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
-        $result = $this->uploader->saveChunk($file, $fileName, $chunkIndex, $totalChunks);
+        $result = $this->uploader->saveChunk(
+            $file,
+            $fileName,
+            $chunkIndex,
+            $totalChunks
+        );
 
-        if ($result['status'] === 'completed') {
-            return new JsonResponse([
-                'message' => 'Plik scalony',
-                'file' => $result['file']
-            ], Response::HTTP_OK);
+        if ($result["status"] === "completed") {
+            return new JsonResponse(
+                [
+                    "message" => "Plik scalony",
+                    "file" => $result["file"],
+                ],
+                Response::HTTP_OK
+            );
         }
 
-        return new JsonResponse(['message' => 'Fragment zapisany'], Response::HTTP_OK);
+        return new JsonResponse(
+            ["message" => "Fragment zapisany"],
+            Response::HTTP_OK
+        );
     }
 }

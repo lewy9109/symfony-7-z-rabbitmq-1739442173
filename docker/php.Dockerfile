@@ -25,6 +25,9 @@ RUN composer --version
 COPY docker/etc/php/php.ini-development /usr/local/etc/php/php.ini
 COPY docker/etc/php/php-fpm.d/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+RUN mkdir -p /var/www/html/public/var && \
+    chown -R www-data:www-data /var/www/html/var && \
+    chmod -R 777 /var/www/html/var
 
 # Set working directory
 WORKDIR /var/www/html
