@@ -49,7 +49,7 @@ class Uploader
             $input = fopen($chunkPath, "rb");
             stream_copy_to_stream($input, $output);
             fclose($input);
-            unlink($chunkPath); // Usunięcie fragmentu po scaleniu
+            unlink($chunkPath);
         }
 
         fclose($output);

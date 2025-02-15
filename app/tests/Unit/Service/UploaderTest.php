@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 
 class UploaderTest extends TestCase
 {
-    private Uploader $uploaded;
+    private Uploader $uploader;
     private string $uploadDir;
     private FileSystem $fileSystem;
 
@@ -18,7 +18,7 @@ class UploaderTest extends TestCase
     {
         $this->uploadDir = __DIR__ . "/csv/";
         $this->fileSystem = $this->createMock(FileSystem::class);
-        $this->uploaded = new Uploader($this->uploadDir, $this->fileSystem);
+        $this->uploader = new Uploader($this->uploadDir, $this->fileSystem);
     }
 
     public function testSaveChunk(): void
@@ -36,7 +36,7 @@ class UploaderTest extends TestCase
 
         $this->fileSystem->method("exists")->willReturn(true);
 
-        $result = $this->uploaded->saveChunk($uploadedFile, "test.csv", 0, 1);
+        $result = $this->uploader->saveChunk($uploadedFile, "test.csv", 0, 1);
 
         $this->assertEquals(
             [
@@ -65,8 +65,36 @@ class UploaderTest extends TestCase
         $this->expectException(FileNotFoundException::class);
         $this->expectExceptionMessage($filePath);
 
-        $this->uploaded->saveChunk($uploadedFile, "test.csv", 0, 1);
+        $this->uploader->saveChunk($uploadedFile, "test.csv", 0, 1);
 
         unlink($this->uploadDir . "test.csv");
+    }
+
+    public function testMergeChunksFailsWhenChunkMissing(): void
+    {
+        $fileName = "testfile.txt";
+        $totalChunks = 3;
+
+        for ($i = 0; $i < 2; $i++) {
+            file_put_contents(
+                $this->uploadDir . "{$fileName}_part_{$i}",
+                "Chunk {$i}"
+            );
+        }
+
+        $result = $this->uploader->saveChunk(
+            $this->createMock(UploadedFile::class),
+            $fileName,
+            2,
+            $totalChunks
+        );
+
+        $this->assertEquals(
+            [
+                "status" => "error",
+                "message" => "Brakuje fragmentu 2",
+            ],
+            $result
+        );
     }
 }
