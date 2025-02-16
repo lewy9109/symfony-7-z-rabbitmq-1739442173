@@ -67,20 +67,4 @@ class HomePageController extends AbstractController
             Response::HTTP_OK
         );
     }
-
-    #[Route('/users', name: 'app_user_list')]
-    public function getUserData(EntityManagerInterface $entityManager, PaginatorInterface $paginator, Request $request): Response
-    {
-        $query = $entityManager->getRepository(User::class)->createQueryBuilder('u')->getQuery();
-
-        $pagination = $paginator->paginate(
-            $query,
-            $request->query->getInt('page', 1), // Current page, default 1
-            10 // Items per page
-        );
-
-        return $this->render('user/index.html.twig', [
-            'pagination' => $pagination,
-        ]);
-    }
 }
