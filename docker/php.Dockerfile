@@ -8,10 +8,12 @@ RUN apt-get update && \
     libmemcached-dev \
     curl \
     vim \
-    zip && \
+    zip \
+    librabbitmq-dev \
+    libssl-dev && \
     docker-php-ext-install mysqli pdo_mysql pdo_pgsql pgsql && \
-    pecl install -o -f redis && \
-    docker-php-ext-enable redis && \
+    pecl install -o -f redis amqp && \
+    docker-php-ext-enable redis amqp && \
     rm -rf /var/lib/apt/lists/* /tmp/pear
 
 COPY ./app /var/www/html

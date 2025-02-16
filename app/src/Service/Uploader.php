@@ -2,14 +2,17 @@
 
 namespace App\Service;
 
+use App\Message\ProcessCsvFile;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class Uploader
 {
     public function __construct(
         private readonly string $uploadsPath,
-        private readonly Filesystem $filesystem
+        private readonly Filesystem $filesystem,
+        private readonly MessageBusInterface $messageBus
     ) {
         if (!$this->filesystem->exists($this->uploadsPath)) {
             $this->filesystem->mkdir($this->uploadsPath, 777);
@@ -53,6 +56,8 @@ class Uploader
         }
 
         fclose($output);
+
+        $this->messageBus->dispatch(new ProcessCsvFile($finalFile));
 
         return ["status" => "completed", "file" => $finalFile];
     }

@@ -2,23 +2,31 @@
 
 namespace App\Tests\Unit\Service;
 
+use App\Message\ProcessCsvFile;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Service\Uploader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Envelope;
 
 class UploaderTest extends TestCase
 {
     private Uploader $uploader;
+
     private string $uploadDir;
+
     private FileSystem $fileSystem;
+
+    private MessageBusInterface $messageBus;
 
     protected function setUp(): void
     {
         $this->uploadDir = __DIR__ . "/csv/";
         $this->fileSystem = $this->createMock(FileSystem::class);
-        $this->uploader = new Uploader($this->uploadDir, $this->fileSystem);
+        $this->messageBus = $this->createMock(MessageBusInterface::class);
+        $this->uploader = new Uploader($this->uploadDir, $this->fileSystem, $this->messageBus);
     }
 
     public function testSaveChunk(): void
@@ -35,6 +43,10 @@ class UploaderTest extends TestCase
         );
 
         $this->fileSystem->method("exists")->willReturn(true);
+        $this->messageBus->expects($this->once())
+            ->method("dispatch")
+            ->with($this->isInstanceOf(ProcessCsvFile::class))
+            ->willReturn(new Envelope(new ProcessCsvFile($this->uploadDir . "test.cs")));
 
         $result = $this->uploader->saveChunk($uploadedFile, "test.csv", 0, 1);
 
@@ -47,7 +59,13 @@ class UploaderTest extends TestCase
         );
         $this->assertFileExists($this->uploadDir . "test.csv");
 
-        unlink($this->uploadDir . "test.csv");
+        if (file_exists($this->uploadDir . "test.csv")) {
+            unlink($this->uploadDir . "test.csv");
+        }
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
     }
 
     public function testWillThrowException(): void
@@ -67,7 +85,13 @@ class UploaderTest extends TestCase
 
         $this->uploader->saveChunk($uploadedFile, "test.csv", 0, 1);
 
-        unlink($this->uploadDir . "test.csv");
+        if (file_exists($this->uploadDir . "test.csv")) {
+            unlink($this->uploadDir . "test.csv");
+        }
+
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
     }
 
     public function testMergeChunksFailsWhenChunkMissing(): void

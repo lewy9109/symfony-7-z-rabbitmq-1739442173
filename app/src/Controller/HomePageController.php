@@ -2,19 +2,16 @@
 
 namespace App\Controller;
 
-use App\Message\ImportCsvMessage;
 use App\Service\Uploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class HomePageController extends AbstractController
 {
     public function __construct(
-        private MessageBusInterface $messageBus,
         private readonly Uploader $uploader
     ) {}
 
@@ -54,6 +51,7 @@ class HomePageController extends AbstractController
         );
 
         if ($result["status"] === "completed") {
+
             return new JsonResponse(
                 [
                     "message" => "Plik scalony",
