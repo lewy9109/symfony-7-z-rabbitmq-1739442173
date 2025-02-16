@@ -46,7 +46,7 @@ class UploaderTest extends TestCase
         $this->messageBus->expects($this->once())
             ->method("dispatch")
             ->with($this->isInstanceOf(ProcessCsvFile::class))
-            ->willReturn(new Envelope(new ProcessCsvFile($this->uploadDir . "test.cs")));
+            ->willReturn(new Envelope(new ProcessCsvFile($this->uploadDir . "test.csv")));
 
         $result = $this->uploader->saveChunk($uploadedFile, "test.csv", 0, 1);
 

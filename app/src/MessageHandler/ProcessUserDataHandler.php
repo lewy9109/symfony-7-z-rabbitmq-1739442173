@@ -9,7 +9,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 class ProcessUserDataHandler
 {
-    public function __invoke(ProcessedUserData $userData)
+    public function __invoke(ProcessedUserData $userData): void
     {
         $userData = new UserDto(
             $userData->getId(),

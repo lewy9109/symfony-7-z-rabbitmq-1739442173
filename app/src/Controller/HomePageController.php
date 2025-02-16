@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\Uploader;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,34 +28,34 @@ class HomePageController extends AbstractController
     public function upload(Request $request): JsonResponse
     {
         $file = $request->files->get("chunk");
+        if (!$file instanceof UploadedFile) {
+            return new JsonResponse(["error" => "Invalid file"], Response::HTTP_BAD_REQUEST);
+        }
         $fileName = $request->request->get("fileName");
-        $chunkIndex = (int) $request->request->get("chunkIndex");
-        $totalChunks = (int) $request->request->get("totalChunks");
-
-        if (
-            !$file ||
-            !$fileName ||
-            $chunkIndex === null ||
-            $totalChunks === null
-        ) {
-            return new JsonResponse(
-                ["error" => "Brak wymaganych danych"],
-                Response::HTTP_BAD_REQUEST
-            );
+        if (!is_string($fileName) || empty($fileName)) {
+            return new JsonResponse(["error" => "Invalid file name"], Response::HTTP_BAD_REQUEST);
+        }
+        $chunkIndex = $request->request->get("chunkIndex");
+        if(empty($chunkIndex) || !is_numeric($chunkIndex)) {
+            return new JsonResponse(["error" => "Nieprawidłowy numer fragmentu"], Response::HTTP_BAD_REQUEST);
+        }
+        $totalChunks = $request->request->get("totalChunks");
+        if(empty($totalChunks) || !is_numeric($totalChunks)) {
+            return new JsonResponse(["error" => "Nieprawidłowy numer fragmentu"], Response::HTTP_BAD_REQUEST);
         }
 
         $result = $this->uploader->saveChunk(
             $file,
             $fileName,
-            $chunkIndex,
-            $totalChunks
+            (int)$chunkIndex,
+            (int)$totalChunks
         );
 
         if ($result["status"] === "completed") {
 
             return new JsonResponse(
                 [
-                    "message" => "Plik scalony",
+                    "message" => "file merged",
                     "file" => $result["file"],
                 ],
                 Response::HTTP_OK
@@ -62,7 +63,7 @@ class HomePageController extends AbstractController
         }
 
         return new JsonResponse(
-            ["message" => "Fragment zapisany"],
+            ["message" => "Chunk saved"],
             Response::HTTP_OK
         );
     }

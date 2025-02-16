@@ -19,6 +19,14 @@ class Uploader
         }
     }
 
+    /**
+     * @param UploadedFile $chunk
+     * @param string       $fileName
+     * @param int          $chunkIndex
+     * @param int          $totalChunks
+     *
+     * @return array<string>
+     */
     public function saveChunk(
         UploadedFile $chunk,
         string $fileName,
@@ -34,10 +42,23 @@ class Uploader
         return ["status" => "saved"];
     }
 
+    /**
+     * @param string $fileName
+     * @param int    $totalChunks
+     *
+     * @return string[]
+     */
     private function mergeChunks(string $fileName, int $totalChunks): array
     {
         $finalFile = $this->uploadsPath . $fileName;
         $output = fopen($finalFile, "wb");
+
+        if ($output === false) {
+            return [
+                "status" => "error",
+                "message" => "Cannot open file",
+            ];
+        }
 
         for ($i = 0; $i < $totalChunks; $i++) {
             $chunkPath = $this->uploadsPath . "{$fileName}_part_{$i}";
@@ -45,11 +66,19 @@ class Uploader
             if (!file_exists($chunkPath)) {
                 return [
                     "status" => "error",
-                    "message" => "Brakuje fragmentu {$i}",
+                    "message" => "Missing chunk {$i}",
                 ];
             }
 
             $input = fopen($chunkPath, "rb");
+            if ($input === false) {
+                fclose($output);
+                return [
+                    "status" => "error",
+                    "message" => "Cannot open the chunk {$i}",
+                ];
+            }
+
             stream_copy_to_stream($input, $output);
             fclose($input);
             unlink($chunkPath);
