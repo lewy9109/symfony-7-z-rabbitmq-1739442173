@@ -36,11 +36,11 @@ class HomePageController extends AbstractController
             return new JsonResponse(["error" => "Invalid file name"], Response::HTTP_BAD_REQUEST);
         }
         $chunkIndex = $request->request->get("chunkIndex");
-        if(empty($chunkIndex) || !is_numeric($chunkIndex)) {
+        if(!is_numeric($chunkIndex)) {
             return new JsonResponse(["error" => "Nieprawidłowy numer fragmentu"], Response::HTTP_BAD_REQUEST);
         }
         $totalChunks = $request->request->get("totalChunks");
-        if(empty($totalChunks) || !is_numeric($totalChunks)) {
+        if(!is_numeric($totalChunks)) {
             return new JsonResponse(["error" => "Nieprawidłowy numer fragmentu"], Response::HTTP_BAD_REQUEST);
         }
 
@@ -66,5 +66,21 @@ class HomePageController extends AbstractController
             ["message" => "Chunk saved"],
             Response::HTTP_OK
         );
+    }
+
+    #[Route('/users', name: 'app_user_list')]
+    public function getUserData(EntityManagerInterface $entityManager, PaginatorInterface $paginator, Request $request): Response
+    {
+        $query = $entityManager->getRepository(User::class)->createQueryBuilder('u')->getQuery();
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1), // Current page, default 1
+            10 // Items per page
+        );
+
+        return $this->render('user/index.html.twig', [
+            'pagination' => $pagination,
+        ]);
     }
 }
