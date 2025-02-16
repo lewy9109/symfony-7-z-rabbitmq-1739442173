@@ -55,7 +55,7 @@ class CsvNormalizingProcessor
 
             fclose($handle);
         } catch (Throwable $e) {
-            throw new Exception(sprintf('Error: %s', $e->getMessage()));
+            throw new NormalizerException(sprintf('Error: %s', $e->getMessage()));
         }
     }
 
