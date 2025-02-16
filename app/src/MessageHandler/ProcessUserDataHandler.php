@@ -18,7 +18,6 @@ class ProcessUserDataHandler
             $userData->getCity()
         );
 
-        dump($userData);
     }
 
 }

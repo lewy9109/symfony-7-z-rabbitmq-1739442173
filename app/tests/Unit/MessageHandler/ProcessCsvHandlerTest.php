@@ -37,7 +37,7 @@ class ProcessCsvHandlerTest extends TestCase
 
     public function testHandlerThrowException(): void
     {
-        $this->normalizing->method('process')->willReturn(['some data']);
+        $this->normalizing->expects($this->once())->method('process');
         $this->logger->expects($this->never())->method('error');
 
         $this->handler->__invoke(new ProcessCsvFile("test.csv"));
