@@ -116,7 +116,7 @@ class UploaderTest extends TestCase
         $this->assertEquals(
             [
                 "status" => "error",
-                "message" => "Brakuje fragmentu 2",
+                "message" => "Missing chunk 2",
             ],
             $result
         );

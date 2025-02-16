@@ -59,6 +59,11 @@ class CsvNormalizingProcessor
         }
     }
 
+    /**
+     * @param ProcessedUserData[] $batch
+     *
+     * @return void
+     */
     private function dispatchBatch(array $batch): void
     {
         foreach ($batch as $message) {

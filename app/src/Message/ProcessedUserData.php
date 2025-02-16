@@ -2,7 +2,6 @@
 
 namespace App\Message;
 
-
 class ProcessedUserData
 {
     public function __construct(
