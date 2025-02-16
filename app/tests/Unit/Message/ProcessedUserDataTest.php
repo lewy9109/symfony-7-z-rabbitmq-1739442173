@@ -9,12 +9,12 @@ class ProcessedUserDataTest extends TestCase
 {
     public function testProcessedUserDataCanBeCreatedWithValidData(): void
     {
-        $userData = new ProcessedUserData(1, "John Doe", "john.doe@example.com", "New York");
+        $userData = new ProcessedUserData(1, "Test test", "test@example.com", "Kato");
 
         $this->assertSame(1, $userData->getId());
-        $this->assertSame("John Doe", $userData->getFullName());
-        $this->assertSame("john.doe@example.com", $userData->getEmail());
-        $this->assertSame("New York", $userData->getCity());
+        $this->assertSame("Test test", $userData->getFullName());
+        $this->assertSame("test@example.com", $userData->getEmail());
+        $this->assertSame("Kato", $userData->getCity());
     }
 
     public function testProcessedUserDataAllowsNullValues(): void

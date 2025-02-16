@@ -25,7 +25,7 @@ class ProcessUserDataHandlerTest extends TestCase
 
     public function testHandleProcessedUserData(): void
     {
-        $userData = new ProcessedUserData(1, "John Doe", "john.doe@example.com", "New York");
+        $userData = new ProcessedUserData(1, "tomek test", "tomek@example.com", "Katowice");
 
         $this->entityManager
             ->expects($this->once())
@@ -45,7 +45,7 @@ class ProcessUserDataHandlerTest extends TestCase
 
     public function testHandleExceptionLogging(): void
     {
-        $userData = new ProcessedUserData(1, "John Doe", "john.doe@example.com", "New York");
+        $userData = new ProcessedUserData(1, "tomek test", "tomek@example.com", "Katowice");
 
         $this->entityManager
             ->expects($this->once())
