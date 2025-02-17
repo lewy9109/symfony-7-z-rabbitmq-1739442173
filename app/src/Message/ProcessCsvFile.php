@@ -2,13 +2,15 @@
 
 namespace App\Message;
 
+use App\Service\Raport\RaportDto;
+
 class ProcessCsvFile
 {
-    public function __construct(private string $filePath)
+    public function __construct(private string $raportId)
     {}
 
-    public function getFilePath(): string
+    public function getRaportId(): string
     {
-        return $this->filePath;
+        return $this->raportId;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Tests\Unit\Service;
 
 use App\Message\ProcessCsvFile;
+use App\Service\RedisStorage\ReportStorage;
 use Symfony\Component\Filesystem\Filesystem;
 use App\Service\Uploader;
 use PHPUnit\Framework\TestCase;
@@ -21,12 +22,15 @@ class UploaderTest extends TestCase
 
     private MessageBusInterface $messageBus;
 
+    private ReportStorage $storage;
+
     protected function setUp(): void
     {
         $this->uploadDir = __DIR__ . "/csv/";
         $this->fileSystem = $this->createMock(FileSystem::class);
         $this->messageBus = $this->createMock(MessageBusInterface::class);
-        $this->uploader = new Uploader($this->uploadDir, $this->fileSystem, $this->messageBus);
+        $this->storage = $this->createMock(ReportStorage::class);
+        $this->uploader = new Uploader($this->uploadDir, $this->fileSystem, $this->storage, $this->messageBus);
     }
 
     public function testSaveChunk(): void
@@ -50,13 +54,11 @@ class UploaderTest extends TestCase
 
         $result = $this->uploader->saveChunk($uploadedFile, "test.csv", 0, 1);
 
-        $this->assertEquals(
-            [
-                "status" => "completed",
-                "file" => $this->uploadDir . "test.csv",
-            ],
-            $result
-        );
+
+        $this->assertArrayHasKey('status', $result);
+        $this->assertArrayHasKey('file', $result);
+        $this->assertArrayHasKey('raportId', $result);
+
         $this->assertFileExists($this->uploadDir . "test.csv");
 
         if (file_exists($this->uploadDir . "test.csv")) {

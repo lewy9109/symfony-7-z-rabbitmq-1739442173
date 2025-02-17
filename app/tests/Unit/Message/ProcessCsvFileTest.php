@@ -13,7 +13,7 @@ class ProcessCsvFileTest extends TestCase
         $path = "/path/to/file.csv";
         $processCsvFile = new ProcessCsvFile($path);
 
-        $this->assertSame($path, $processCsvFile->getFilePath());
+        $this->assertSame($path, $processCsvFile->getRaportId());
     }
 
 }

@@ -55,6 +55,15 @@ services:
     networks:
       - application
 
+  app_redis:
+    image: redis:alpine
+    container_name: app_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - application
+
 volumes:
   db-volume:
 

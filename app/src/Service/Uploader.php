@@ -3,15 +3,19 @@
 namespace App\Service;
 
 use App\Message\ProcessCsvFile;
+use App\Service\Raport\RaportDto;
+use App\Service\RedisStorage\ReportStorage;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Uid\Uuid;
 
 class Uploader
 {
     public function __construct(
         private readonly string $uploadsPath,
         private readonly Filesystem $filesystem,
+        private readonly ReportStorage $storage,
         private readonly MessageBusInterface $messageBus
     ) {
         if (!$this->filesystem->exists($this->uploadsPath)) {
@@ -86,8 +90,25 @@ class Uploader
 
         fclose($output);
 
-        $this->messageBus->dispatch(new ProcessCsvFile($finalFile));
+        $raportId = $this->createRaport($finalFile);
 
-        return ["status" => "completed", "file" => $finalFile];
+        $this->messageBus->dispatch(new ProcessCsvFile($raportId));
+
+        return ["status" => "completed", "file" => $finalFile, "raportId" => $raportId];
+    }
+
+    private function createRaport(string $finalFile): string
+    {
+        $report = new RaportDto(
+            Uuid::v4()->toBase32(),
+            $finalFile,
+            'Create raport',
+            (new \DateTime('now'))->format('Y-m-d H:i:s'),
+            microtime(true)
+        );
+
+        $this->storage->saveReport($report);
+
+        return $report->getId();
     }
 }

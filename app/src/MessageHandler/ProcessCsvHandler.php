@@ -4,8 +4,10 @@ namespace App\MessageHandler;
 
 use App\Message\ProcessCsvFile;
 use App\Service\Normalize\CsvNormalizingProcessor;
+use App\Service\RedisStorage\ReportStorage;
 use Exception;
 use Psr\Log\LoggerInterface;
+use RedisException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
@@ -13,6 +15,7 @@ class ProcessCsvHandler
 {
     public function __construct(
         private readonly CsvNormalizingProcessor $normalizing,
+        private readonly ReportStorage $reportStorage,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -23,11 +26,12 @@ class ProcessCsvHandler
     public function __invoke(ProcessCsvFile $message): void
     {
         try{
-             $this->normalizing->process($message->getFilePath());
-        }catch (Exception $exception){
+            $report = $this->reportStorage->getReport($message->getRaportId());
+            $this->normalizing->process($report);
+        }catch (Exception|RedisException $exception){
             $this->logger->error('Error while processing csv file',[
                 'message' => $exception->getMessage(),
-                'file' => $message->getFilePath()
+                'reportId' => $message->getRaportId()
             ]);
             throw $exception;
         }
