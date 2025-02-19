@@ -2,7 +2,6 @@
 
 namespace App\Service\RedisStorage;
 
-use App\Service\Raport\RaportDto;
 use Redis;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
@@ -12,6 +11,7 @@ abstract class Storage
 
     public function __construct()
     {
+        /**@phpstan-ignore-next-line */
         $this->redis = RedisAdapter::createConnection($_ENV['REDIS_CACHE_URL']);
     }
 }

@@ -4,6 +4,9 @@ namespace App\Service\Raport;
 
 class RaportFactory
 {
+    /**
+     * @param array<string, string> $data
+     */
     public static function fromArray(array $data): RaportDto
     {
         $dto = new RaportDto(
@@ -23,7 +26,7 @@ class RaportFactory
         }
 
         if (isset($data['processedRows'])) {
-            $dto->setProcessedRows($data['processedRows']);
+            $dto->setProcessedRows((int)$data['processedRows']);
         }
 
         if (isset($data['errors']) && is_array($data['errors'])) {

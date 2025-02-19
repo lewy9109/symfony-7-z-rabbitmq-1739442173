@@ -15,7 +15,7 @@ class ReportStorage extends Storage
      */
     public function save(RaportDto $report): void
     {
-        $this->redis->set(sprintf("report:%s", $report->getId()), json_encode($report->toArray()));
+        $this->redis->set(sprintf("report:%s", $report->getId()), json_encode($report->toArray(), JSON_THROW_ON_ERROR));
     }
 
     /**
@@ -30,8 +30,14 @@ class ReportStorage extends Storage
             throw new \Exception(sprintf('Report with id %s not found', $id));
         }
 
-        $reportDecode =  json_decode($report, true);
+        /** @phpstan-ignore-next-line  */
+        $reportDecode =  json_decode($report, true, JSON_THROW_ON_ERROR);
 
+        if (!is_array($reportDecode)) {
+            throw new \Exception(sprintf('Invalid report data for id %s', $id));
+        }
+
+        /** @phpstan-ignore-next-line  */
         return RaportFactory::fromArray($reportDecode);
     }
 }

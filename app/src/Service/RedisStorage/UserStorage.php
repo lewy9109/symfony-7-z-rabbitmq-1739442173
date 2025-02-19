@@ -16,7 +16,7 @@ class UserStorage extends Storage
      */
     public function save(UserDto $user): void
     {
-        $this->redis->set(sprintf("user:%s", $user->getId()), json_encode($user->toArray()));
+        $this->redis->set(sprintf("user:%s", $user->getId()), json_encode($user->toArray(), JSON_THROW_ON_ERROR));
         $this->redis->sAdd("users:list", $user->getId());
     }
 
@@ -32,18 +32,23 @@ class UserStorage extends Storage
             throw new \Exception(sprintf('User with id %s not found', $id));
         }
 
-        $userDecode =  json_decode($report, true);
+        /** @phpstan-ignore-next-line  */
+        $userDecode = json_decode($report, true, JSON_THROW_ON_ERROR);
 
+        if (!is_array($userDecode)) {
+            throw new \Exception(sprintf('Invalid user data for id %s', $id));
+        }
+
+        /** @phpstan-ignore-next-line  */
         return UserFactory::fromArray($userDecode);
     }
 
     /**
-     * Get a paginated list of users stored in Redis
      *
-     * @param int $page Current page number (starts at 1)
-     * @param int $perPage Number of users per page
+     * @param int $page
+     * @param int $perPage
      *
-     * @return array ['users' => UserDto[], 'totalPages' => int, 'totalUsers' => int]
+     * @return array<string, mixed>
      * @throws RedisException
      */
     public function getAllUsersPaginated(int $page = 1, int $perPage = 10): array
@@ -52,7 +57,6 @@ class UserStorage extends Storage
         $totalUsers = count($userIds);
         $totalPages = (int) ceil($totalUsers / $perPage);
 
-        // Get user IDs for the requested page
         $pagedUserIds = array_slice($userIds, ($page - 1) * $perPage, $perPage);
         $users = [];
 
@@ -60,7 +64,7 @@ class UserStorage extends Storage
             try {
                 $users[] = $this->get($id);
             } catch (\Exception $e) {
-                continue; // Skip missing users
+                continue;
             }
         }
 

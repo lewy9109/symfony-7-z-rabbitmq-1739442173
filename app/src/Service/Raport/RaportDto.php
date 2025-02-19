@@ -10,6 +10,9 @@ class RaportDto
 
     private ?int $processedRows = 0;
 
+    /**
+     * @var array<string, mixed>
+     */
     private array $errors = [];
 
     public function __construct(
@@ -93,11 +96,19 @@ class RaportDto
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getErrors(): array
     {
         return $this->errors;
     }
 
+    /**
+     * @param array<string, mixed> $errors
+     *
+     * @return $this
+     */
     public function setErrors(array $errors): self
     {
         $this->errors = $errors;
@@ -105,6 +116,11 @@ class RaportDto
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $errors
+     *
+     * @return $this
+     */
     public function addErrors(array $errors): self
     {
         $this->errors[] = $errors;
@@ -129,7 +145,9 @@ class RaportDto
         return $this->filePath;
     }
 
-
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

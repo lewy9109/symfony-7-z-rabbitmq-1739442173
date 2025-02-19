@@ -104,7 +104,7 @@ class Uploader
             $finalFile,
             'Create raport',
             (new \DateTime('now'))->format('Y-m-d H:i:s'),
-            microtime(true)
+            microtime()
         );
 
         $this->storage->save($report);
