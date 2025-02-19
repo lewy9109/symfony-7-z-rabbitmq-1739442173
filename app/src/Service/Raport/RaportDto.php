@@ -19,7 +19,7 @@ class RaportDto
         private string $id,
         private string $filePath,
         private string $status,
-        private string $created_at,
+        private string $createdAt,
         private string $startTime,
     ) {
     }
@@ -38,12 +38,12 @@ class RaportDto
 
     public function getCreatedAt(): string
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(string $created_at): self
+    public function setCreatedAt(string $createdAt): self
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -154,7 +154,7 @@ class RaportDto
             'id' => $this->id,
             'filePath' => $this->filePath,
             'status' => $this->status,
-            'created_at' => $this->created_at,
+            'createdAt' => $this->createdAt,
             'startTime' => $this->startTime,
             'endTime' => $this->endTime,
             'duration' => $this->duration,

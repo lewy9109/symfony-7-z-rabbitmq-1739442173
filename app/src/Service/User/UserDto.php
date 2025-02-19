@@ -26,7 +26,7 @@ class UserDto
 
         #[Assert\NotBlank(message: "City cannot be empty.")]
         #[Assert\Length(
-            min: 2,
+            min: 3,
             max: 50,
             minMessage: "City name must be at least {{ limit }} characters long.",
             maxMessage: "City name cannot exceed {{ limit }} characters."

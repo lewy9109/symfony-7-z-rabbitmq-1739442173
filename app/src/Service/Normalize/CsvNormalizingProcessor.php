@@ -11,7 +11,6 @@ use App\Service\RedisStorage\ReportStorage;
 use App\Service\RedisStorage\UserStorage;
 use App\Service\User\UserDto;
 use Exception;
-use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Throwable;
 
@@ -19,14 +18,12 @@ class CsvNormalizingProcessor
 {
     private const CHUNK_SIZE = 500;
 
-    private ValidatorInterface $validator;
-
     public function __construct(
         private readonly ReportStorage $reportStorage,
-        private readonly UserStorage $userStorage
+        private readonly UserStorage $userStorage,
+        private readonly ValidatorInterface $validator
     )
     {
-        $this->validator = Validation::createValidator();
     }
 
     /**
@@ -52,7 +49,8 @@ class CsvNormalizingProcessor
             $batch = 0;
             $processedRows = 0;
             while (($row = fgetcsv($handle, 1000, ",")) !== false) {
-                list($id, $fullName, $email, $city) = $row;
+                list($id, $fullName, $email, $city) = array_map('trim', $row);
+
                 $processData = new UserDto((int)$id, $fullName, $email, $city, $report->getId());
 
                 $violations = $this->validator->validate($processData);
@@ -66,7 +64,6 @@ class CsvNormalizingProcessor
                         ];
                     }
 
-                    $report->addErrors($err);
                 } else {
                     $this->userStorage->save($processData);
                 }

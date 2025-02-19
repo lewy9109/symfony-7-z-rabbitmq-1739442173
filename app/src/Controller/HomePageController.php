@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\Raport\RaportDto;
+use App\Service\RedisStorage\ReportStorage;
 use App\Service\RedisStorage\UserStorage;
 use App\Service\Uploader;
 use DateTime;
@@ -19,7 +20,8 @@ class HomePageController extends AbstractController
 {
     public function __construct(
         private readonly Uploader $uploader,
-        private readonly UserStorage $userStorage
+        private readonly UserStorage $userStorage,
+        private readonly ReportStorage $reportStorage
     ) {}
 
     #[Route("/", name: "app_home_page")]
@@ -88,4 +90,37 @@ class HomePageController extends AbstractController
             'currentPage' => $pagination['currentPage'],
         ]);
     }
+
+    #[Route('/report/latest', name: 'latest_report')]
+    public function latestReport(): Response
+    {
+        try {
+            $report = $this->reportStorage->getLastReport();
+            $decodedErrors = [];
+
+            foreach ($report->getErrors() as $errorGroup) {
+                if (is_string($errorGroup)) {
+                    $errorGroup = json_decode($errorGroup, true);
+                }
+
+                if (is_array($errorGroup)) {
+                    foreach ($errorGroup as $error) {
+                        $decodedErrors[] = $error;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            return $this->render('report/latest.html.twig', [
+                'error' => $e->getMessage(),
+                'report' => null,
+            ]);
+        }
+
+        return $this->render('report/latest.html.twig', [
+            'report' => $report,
+            'error' => null,
+            'raportErrors' => $decodedErrors
+        ]);
+    }
+
 }

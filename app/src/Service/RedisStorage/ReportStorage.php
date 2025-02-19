@@ -10,12 +10,17 @@ use RedisException;
 
 class ReportStorage extends Storage
 {
+    private const LAST_REPORT_KEY = "report:last";
+
     /**
      * @throws RedisException
      */
     public function save(RaportDto $report): void
     {
-        $this->redis->set(sprintf("report:%s", $report->getId()), json_encode($report->toArray(), JSON_THROW_ON_ERROR));
+        $reportKey = sprintf("report:%s", $report->getId());
+        $this->redis->set($reportKey, json_encode($report->toArray(), JSON_THROW_ON_ERROR));
+
+        $this->redis->set(self::LAST_REPORT_KEY, $report->getId());
     }
 
     /**
@@ -39,5 +44,22 @@ class ReportStorage extends Storage
 
         /** @phpstan-ignore-next-line  */
         return RaportFactory::fromArray($reportDecode);
+    }
+
+    /**
+     * Retrieves the last saved report.
+     *
+     * @throws RedisException
+     * @throws \Exception
+     */
+    public function getLastReport(): ?RaportDto
+    {
+        $lastReportId = $this->redis->get(self::LAST_REPORT_KEY);
+
+        if (!$lastReportId) {
+            throw new \Exception('No reports found in Redis.');
+        }
+
+        return $this->get($lastReportId);
     }
 }

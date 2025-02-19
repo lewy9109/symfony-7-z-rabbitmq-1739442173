@@ -10,7 +10,4 @@ docker-compose build --no-cache
 docker-compose up -d --remove-orphans
 
 docker exec -it --user www-data app_php composer install
-
-#docker exec -it --user www-data "${CONTAINER_NAME}" bin/console doctrine:database:create --if-not-exists
-#docker exec -it --user www-data "${CONTAINER_NAME}" bin/console doctrine:migrations:migrate -n
-#docker exec -it --user www-data "${CONTAINER_NAME}" bin/console doctrine:schema:validate
+docker exec -it --user www-data app_php bin/console messenger:consume

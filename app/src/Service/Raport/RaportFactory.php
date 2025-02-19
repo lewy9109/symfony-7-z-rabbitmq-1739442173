@@ -13,7 +13,7 @@ class RaportFactory
             id: $data['id'] ?? '',
             filePath: $data['filePath'] ?? '',
             status: $data['status'] ?? '',
-            created_at: $data['created_at'] ?? '',
+            createdAt: $data['createdAt'] ?? '',
             startTime: $data['startTime'] ?? ''
         );
 
