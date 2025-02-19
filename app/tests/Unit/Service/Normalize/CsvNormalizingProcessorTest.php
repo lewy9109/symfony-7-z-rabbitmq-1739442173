@@ -11,19 +11,21 @@ use App\Service\RedisStorage\ReportStorage;
 use App\Service\RedisStorage\UserStorage;
 use App\Service\User\UserDto;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Validator\Validation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class CsvNormalizingProcessorTest extends TestCase
 {
     private ReportStorage $reportStorage;
     private UserStorage $userStorage;
     private CsvNormalizingProcessor $processor;
+    private ValidatorInterface $validator;
 
     protected function setUp(): void
     {
         $this->reportStorage = $this->createMock(ReportStorage::class);
         $this->userStorage = $this->createMock(UserStorage::class);
-        $this->processor = new CsvNormalizingProcessor($this->reportStorage, $this->userStorage);
+        $this->validator = $this->createMock(ValidatorInterface::class);
+        $this->processor = new CsvNormalizingProcessor($this->reportStorage, $this->userStorage, $this->validator);
     }
 
     public function testProcessValidCsv(): void
@@ -42,7 +44,7 @@ class CsvNormalizingProcessorTest extends TestCase
             id: 'test123',
             filePath: $csvFilePath,
             status: 'pending',
-            created_at: '2025-02-17 12:00:00',
+            createdAt: '2025-02-17 12:00:00',
             startTime: '2025-02-17 12:01:00'
         );
 
@@ -67,7 +69,7 @@ class CsvNormalizingProcessorTest extends TestCase
             id: 'test123',
             filePath: '/non/existing/file.csv',
             status: 'pending',
-            created_at: '2025-02-17 12:00:00',
+            createdAt: '2025-02-17 12:00:00',
             startTime: '2025-02-17 12:01:00'
         );
 
@@ -86,7 +88,7 @@ class CsvNormalizingProcessorTest extends TestCase
             id: 'test123',
             filePath: $emptyCsvFilePath,
             status: 'pending',
-            created_at: '2025-02-17 12:00:00',
+            createdAt: '2025-02-17 12:00:00',
             startTime: '2025-02-17 12:01:00'
         );
 
@@ -112,7 +114,7 @@ class CsvNormalizingProcessorTest extends TestCase
             id: 'batchTest',
             filePath: $csvFilePath,
             status: 'pending',
-            created_at: '2025-02-17 12:00:00',
+            createdAt: '2025-02-17 12:00:00',
             startTime: '2025-02-17 12:01:00'
         );
 
