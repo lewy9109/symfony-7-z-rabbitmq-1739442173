@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Latest Report{% endblock %}
+
+{% block body %}
+    <div class="report-container">
+
+        <div class="navigation-links">
+            <a href="{{ path('app_home_page') }}" class="nav-button">Main page</a>
+        </div>
+
+        <h1>Latest Report</h1>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% elseif report %}
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <td>{{ report.id }}</td>
+                </tr>
+                <tr>
+                    <th>Status</th>
+                    <td>{{ report.status }}</td>
+                </tr>
+                <tr>
+                    <th>File Path</th>
+                    <td>{{ report.filePath }}</td>
+                </tr>
+                <tr>
+                    <th>Created At</th>
+                    <td>{{ report.createdAt ?? '' }}</td>
+                </tr>
+                <tr>
+                    <th>Start Time</th>
+                    <td>{{ report.startTime }}</td>
+                </tr>
+                <tr>
+                    <th>End Time</th>
+                    <td>{{ report.endTime ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <th>Duration</th>
+                    <td>{{ report.duration ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <th>Processed Rows</th>
+                    <td>{{ report.processedRows ?? '0' }}</td>
+                </tr>
+                <tr>
+                    <th>Errors</th>
+                    <td>
+                        {% if raportErrors|length > 0 %}
+                            <ul>
+                                {% for error in raportErrors %}
+                                    <li>
+                                        {% if error.id is defined %}
+                                            ID {{ error.id }}:
+                                        {% endif %}
+                                        {{ error.message }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            No errors
+                        {% endif %}
+                    </td>
+                </tr>
+
+            </table>
+        {% else %}
+            <p>No reports found.</p>
+        {% endif %}
+    </div>
+
+    <style>
+        .report-container {
+            max-width: 600px;
+            margin: auto;
+            text-align: left;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+{% endblock %}

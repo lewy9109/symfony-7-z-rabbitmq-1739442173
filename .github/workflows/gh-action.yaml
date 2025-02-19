@@ -1,0 +1,58 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Symfony
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  symfony-tests:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for Redis to Start
+        run: |
+          echo "Checking Redis availability..."
+          for i in {1..10}; do
+            nc -z localhost 6379 && echo "Redis is up" && exit 0
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+          echo "Redis did not start" && exit 1
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install Dependencies
+        working-directory: ./app
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run PHP Unit
+        env:
+          REDIS_URL: redis://localhost:6379
+        working-directory: ./app
+        run: php bin/phpunit

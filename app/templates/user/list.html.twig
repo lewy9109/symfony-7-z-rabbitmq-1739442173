@@ -1,0 +1,52 @@
+{# templates/user/list.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}User List{% endblock %}
+
+{% block body %}
+
+    <div class="navigation-links">
+        <a href="{{ path('app_home_page') }}" class="nav-button">Main page</a>
+    </div>
+
+    <h1>User List</h1>
+
+    {# Display Users #}
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.fullName }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.city }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="3">No users found.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {# Pagination Controls #}
+    <div>
+        {% if currentPage > 1 %}
+            <a href="{{ path('user_list', {'page': currentPage - 1}) }}">« Previous</a>
+        {% endif %}
+
+        Page {{ currentPage }} of {{ totalPages }}
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('user_list', {'page': currentPage + 1}) }}">Next »</a>
+        {% endif %}
+    </div>
+
+{% endblock %}
