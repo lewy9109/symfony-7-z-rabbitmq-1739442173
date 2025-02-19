@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Service\Normalize;
 
-use App\Message\ProcessedUserData;
 use App\Service\Exception\NormalizerException;
 use App\Service\Raport\RaportDto;
 use App\Service\RedisStorage\ReportStorage;
@@ -62,7 +61,9 @@ class CsvNormalizingProcessor
                             'id' => $processData->getId(),
                             'message' => $violation->getMessage()
                         ];
+                        $report->addErrors($err);
                     }
+                    $this->reportStorage->save($report);
 
                 } else {
                     $this->userStorage->save($processData);
