@@ -5,24 +5,15 @@ declare(strict_types=1);
 namespace App\Service\RedisStorage;
 
 use App\Service\Raport\RaportDto;
-use App\Service\Raport\RaportDtoFactory;
-use Redis;
+use App\Service\Raport\RaportFactory;
 use RedisException;
-use Symfony\Component\Cache\Adapter\RedisAdapter;
 
-class ReportStorage
+class ReportStorage extends Storage
 {
-    private Redis $redis;
-
-    public function __construct()
-    {
-        $this->redis = RedisAdapter::createConnection($_ENV['REDIS_CACHE_URL']);
-    }
-
     /**
      * @throws RedisException
      */
-    public function saveReport(RaportDto $report): void
+    public function save(RaportDto $report): void
     {
         $this->redis->set(sprintf("report:%s", $report->getId()), json_encode($report->toArray()));
     }
@@ -31,7 +22,7 @@ class ReportStorage
      * @throws RedisException
      * @throws \Exception
      */
-    public function getReport(string $id): ?RaportDto
+    public function get(string $id): ?RaportDto
     {
         $report = $this->redis->get("report:$id");
 
@@ -41,7 +32,6 @@ class ReportStorage
 
         $reportDecode =  json_decode($report, true);
 
-        return RaportDtoFactory::fromArray($reportDecode);
+        return RaportFactory::fromArray($reportDecode);
     }
-
 }

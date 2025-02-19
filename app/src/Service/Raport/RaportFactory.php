@@ -2,7 +2,7 @@
 
 namespace App\Service\Raport;
 
-class RaportDtoFactory
+class RaportFactory
 {
     public static function fromArray(array $data): RaportDto
     {

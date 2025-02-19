@@ -34,7 +34,6 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Message\ProcessCsvFile': async
-            'App\Message\ProcessedUserData': async
 
 # when@test:
 #    framework:

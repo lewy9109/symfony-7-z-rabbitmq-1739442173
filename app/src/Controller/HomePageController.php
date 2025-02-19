@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\Raport\RaportDto;
+use App\Service\RedisStorage\UserStorage;
 use App\Service\Uploader;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,7 +18,8 @@ use Symfony\Component\Uid\Uuid;
 class HomePageController extends AbstractController
 {
     public function __construct(
-        private readonly Uploader $uploader
+        private readonly Uploader $uploader,
+        private readonly UserStorage $userStorage
     ) {}
 
     #[Route("/", name: "app_home_page")]
@@ -70,5 +72,20 @@ class HomePageController extends AbstractController
             ["message" => "Chunk saved"],
             Response::HTTP_OK
         );
+    }
+
+    #[Route('/users', name: 'user_list')]
+    public function listUsers(Request $request): Response
+    {
+        $page = $request->query->getInt('page', 1);
+        $perPage = 10;
+
+        $pagination = $this->userStorage->getAllUsersPaginated($page, $perPage);
+
+        return $this->render('user/list.html.twig', [
+            'users' => $pagination['users'],
+            'totalPages' => $pagination['totalPages'],
+            'currentPage' => $pagination['currentPage'],
+        ]);
     }
 }

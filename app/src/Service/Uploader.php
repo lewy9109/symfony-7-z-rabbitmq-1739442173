@@ -107,7 +107,7 @@ class Uploader
             microtime(true)
         );
 
-        $this->storage->saveReport($report);
+        $this->storage->save($report);
 
         return $report->getId();
     }

@@ -45,7 +45,7 @@ class ProcessCsvHandlerTest extends TestCase
         $this->normalizing->expects($this->never())->method('process');
         $this->reportStorage
             ->expects($this->once())
-            ->method('getReport')
+            ->method('get')
             ->with('idstorage')
             ->willThrowException(new \RedisException('test'));
 

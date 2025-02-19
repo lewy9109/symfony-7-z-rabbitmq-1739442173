@@ -8,8 +8,9 @@ use App\Message\ProcessedUserData;
 use App\Service\Exception\NormalizerException;
 use App\Service\Raport\RaportDto;
 use App\Service\RedisStorage\ReportStorage;
+use App\Service\RedisStorage\UserStorage;
+use App\Service\User\UserDto;
 use Exception;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Throwable;
@@ -21,8 +22,8 @@ class CsvNormalizingProcessor
     private ValidatorInterface $validator;
 
     public function __construct(
-        private readonly MessageBusInterface $messageBus,
-        private readonly ReportStorage $reportStorage
+        private readonly ReportStorage $reportStorage,
+        private readonly UserStorage $userStorage
     )
     {
         $this->validator = Validation::createValidator();
@@ -48,63 +49,48 @@ class CsvNormalizingProcessor
 
             fgetcsv($handle);
 
-            $batch = [];
+            $batch = 0;
             $processedRows = 0;
             while (($row = fgetcsv($handle, 1000, ",")) !== false) {
-
                 list($id, $fullName, $email, $city) = $row;
-                $processData = new ProcessedUserData((int)$id, $fullName, $email, $city);
+                $processData = new UserDto((int)$id, $fullName, $email, $city, $report->getId());
 
                 $violations = $this->validator->validate($processData);
 
                 if (count($violations) > 0) {
                     $err = [];
                     foreach ($violations as $violation) {
-                        $err[$id] = [
-                            $violation->getMessage()
+                        $err[] = [
+                            'id' => $processData->getId(),
+                            'message' => $violation->getMessage()
                         ];
                     }
 
                     $report->addErrors($err);
                 } else {
-                    $batch[] = new ProcessedUserData((int)$id, $fullName, $email, $city);
+                    $this->userStorage->save($processData);
                 }
 
 
-                if (count($batch) >= self::CHUNK_SIZE) {
-                    $this->dispatchBatch($batch);
-                    $batch = [];
+                if ($batch >= self::CHUNK_SIZE) {
+                    gc_collect_cycles();
+                    $batch = 0;
                 }
 
+                $batch ++;
                 $processedRows ++;
             }
 
             $report->setProcessedRows($processedRows);
-            $report->setEndTime(microtime(true));
-
-            $this->reportStorage->saveReport($report);
-
-            if (!empty($batch)) {
-                $this->dispatchBatch($batch);
-            }
-
+            $report->setEndTime(microtime());
+            $report->setStatus("SUCCESS");
+            $this->reportStorage->save($report);
             fclose($handle);
         } catch (Throwable $e) {
+            $report->setStatus("ERROR");
+            $report->setEndTime(microtime());
+            $this->reportStorage->save($report);
             throw new NormalizerException(sprintf('Error: %s', $e->getMessage()));
         }
-    }
-
-    /**
-     * @param ProcessedUserData[] $batch
-     *
-     * @return void
-     */
-    private function dispatchBatch(array $batch): void
-    {
-        foreach ($batch as $message) {
-            $this->messageBus->dispatch($message);
-        }
-
-        gc_collect_cycles();
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Tests\Unit\Service\RedisStorage;
 
 use App\Service\Raport\RaportDto;
-use App\Service\Raport\RaportDtoFactory;
+use App\Service\Raport\RaportFactory;
 use App\Service\RedisStorage\ReportStorage;
 use PHPUnit\Framework\TestCase;
 use Redis;
@@ -44,7 +44,7 @@ class ReportStorageTest extends TestCase
             ->method('set')
             ->with('report:12345', json_encode($raportDto->toArray()));
 
-        $this->reportStorage->saveReport($raportDto);
+        $this->reportStorage->save($raportDto);
     }
 
     public function testGetReportReturnsDto(): void
@@ -68,7 +68,7 @@ class ReportStorageTest extends TestCase
             ->with("report:$reportId")
             ->willReturn(json_encode($reportArray));
 
-        $result = $this->reportStorage->getReport($reportId);
+        $result = $this->reportStorage->get($reportId);
 
         $this->assertInstanceOf(RaportDto::class, $result);
         $this->assertEquals($reportId, $result->getId());
@@ -89,6 +89,6 @@ class ReportStorageTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage(sprintf('Report with id %s not found', $reportId));
 
-        $this->reportStorage->getReport($reportId);
+        $this->reportStorage->get($reportId);
     }
 }

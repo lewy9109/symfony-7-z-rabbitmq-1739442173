@@ -26,7 +26,9 @@ class ProcessCsvHandler
     public function __invoke(ProcessCsvFile $message): void
     {
         try{
-            $report = $this->reportStorage->getReport($message->getRaportId());
+            $report = $this->reportStorage->get($message->getRaportId());
+            $report->setStatus('Processing');
+            $this->reportStorage->save($report);
             $this->normalizing->process($report);
         }catch (Exception|RedisException $exception){
             $this->logger->error('Error while processing csv file',[
