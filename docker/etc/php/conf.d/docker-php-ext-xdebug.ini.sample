@@ -1,0 +1,6 @@
+zend_extension=xdebug
+xdebug.client_host=host.docker.internal
+xdebug.start_with_request=yes
+xdebug.mode=debug,develop,coverage
+xdebug.client_port=9000
+xdebug.discover_client_host = 1

@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Plik Upload - Symfony{% endblock %}
+
+{% block body %}
+  <div class="upload-container">
+    <input type="file" id="fileInput" />
+    <button id="uploadButton" disabled>Zatwierdź</button>
+    <progress id="progressBar" value="0" max="100"></progress>
+    <p id="progressText">0%</p>
+  </div>
+
+  <script>
+    document.getElementById('fileInput').addEventListener('change', function (event) {
+      const file = event.target.files[0];
+      document.getElementById('uploadButton').disabled = !file; // Aktywacja przycisku
+    });
+
+    document.getElementById('uploadButton').addEventListener('click', async function () {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      const chunkSize = 2 * 1024 * 1024; // 3MB
+      const totalChunks = Math.ceil(file.size / chunkSize);
+      const fileName = file.name;
+
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+
+      progressBar.value = 0;
+      progressBar.max = 100;
+
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+
+        const formData = new FormData();
+        formData.append("chunk", chunk);
+        formData.append("fileName", fileName);
+        formData.append("chunkIndex", i);
+        formData.append("totalChunks", totalChunks);
+
+        try {
+          const response = await fetch("{{ path('csv_upload') }}", {
+            method: "POST",
+            body: formData
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            console.error("Błąd:", result.error || "Nieznany błąd");
+            return;
+          }
+
+          // Aktualizacja paska postępu
+          let progress = Math.round(((i + 1) / totalChunks) * 100);
+          progressBar.value = progress;
+          progressText.innerText = `${progress}%`;
+
+          console.log(`Wysłano fragment ${i + 1} z ${totalChunks}`);
+
+          if (result.status === "completed") {
+            console.log("Plik został scalony:", result.file);
+          }
+
+        } catch (error) {
+          console.error("Błąd wysyłania fragmentu:", error);
+          return;
+        }
+      }
+
+      console.log("Wszystkie fragmenty zostały wysłane.");
+    });
+  </script>
+
+  <style>
+    .upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 50px;
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    progress {
+      width: 80%;
+      height: 20px;
+    }
+
+    p {
+      font-size: 16px;
+      font-weight: bold;
+    }
+  </style>
+{% endblock %}
